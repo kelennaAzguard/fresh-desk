@@ -89,7 +89,7 @@ public class TicketController implements TicketInterface {
 	@Override
 	public ResponseEntity<?> getTicketById(Long id, String include) {
 		TicketResponseDto getTicket = ticketProcessor.getTicketById(id,include);
-		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
+		return new GenericResponseHandlers.Builder().setMessage("get ticket by id")
 				.setStatus(HttpStatus.OK).setData(getTicket).create();
 	}
 
