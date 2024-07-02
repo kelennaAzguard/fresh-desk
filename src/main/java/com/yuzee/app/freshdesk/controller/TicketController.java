@@ -48,25 +48,23 @@ public class TicketController implements TicketInterface {
 	public ResponseEntity<?> createTicketWithAttachments(String email, String subject, String description,
 			MultipartFile[] multipartFiles) throws IOException, java.io.IOException {
 		log.info("inside group dialog controller");
-		 log.info("Creating ticket with email: {}, subject: {}, description: {}", email, subject, description);
+		log.info("Creating ticket with email: {}, subject: {}, description: {}", email, subject, description);
 
-	        // Convert MultipartFiles to Attachments using streams
-	        List<Attachment> attachments = Arrays.stream(multipartFiles)
-	                .map(file -> {
-	                 
-	                        Attachment attachment = new Attachment();
-	                        attachment.setName(file.getOriginalFilename());
-	                        attachment.setContentType(file.getContentType());
-	                        attachment.setFileSize(file.getSize());
-	                        attachment.setAttachmentUrl(file.getOriginalFilename());
-	                        // Set createdAt and updatedAt as needed
-	                        attachment.setCreatedAt(LocalDateTime.now());
-	                        attachment.setUpdatedAt(LocalDateTime.now());
-	                      
-	                        return attachment;
-	                  
-	                })
-	                .collect(Collectors.toList());
+		// Convert MultipartFiles to Attachments using streams
+		List<Attachment> attachments = Arrays.stream(multipartFiles).map(file -> {
+
+			Attachment attachment = new Attachment();
+			attachment.setName(file.getOriginalFilename());
+			attachment.setContentType(file.getContentType());
+			attachment.setFileSize(file.getSize());
+			attachment.setAttachmentUrl(file.getOriginalFilename());
+			// Set createdAt and updatedAt as needed
+			attachment.setCreatedAt(LocalDateTime.now());
+			attachment.setUpdatedAt(LocalDateTime.now());
+
+			return attachment;
+
+		}).collect(Collectors.toList());
 		TicketDto ticketDto = new TicketDto();
 		ticketDto.setAttachments(attachments);
 		ticketDto.setSubject(subject);
@@ -74,9 +72,18 @@ public class TicketController implements TicketInterface {
 		ticketDto.setEmail(email);
 		// Call ticketProcessor to create ticket with attachments
 		TicketResponseDto createdTicket = ticketProcessor.createTicket(ticketDto);
-		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully").setStatus(HttpStatus.OK)
-				.setData(createdTicket).create();
+		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
+				.setStatus(HttpStatus.OK).setData(createdTicket).create();
 	}
-	
+
+	@Override
+	public ResponseEntity<?> getTickets(String filter, Long requesterId, String email, String uniqueExternalId,
+			Long companyId, String updatedSince, String orderBy, String orderType, String include) {
+		// TODO Auto-generated method stub
+		TicketResponseDto createdTicket = ticketProcessor.getAllTicket(filter, requesterId, email, uniqueExternalId,
+				companyId, updatedSince, orderBy, orderType, include);
+		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
+				.setStatus(HttpStatus.OK).setData(createdTicket).create();
+	}
 
 }

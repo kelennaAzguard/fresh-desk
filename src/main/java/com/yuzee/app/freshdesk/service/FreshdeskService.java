@@ -1,7 +1,7 @@
 package com.yuzee.app.freshdesk.service;
 
 import java.util.Base64;
-
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.yuzee.app.freshdesk.dto.TicketDto;
 import com.yuzee.app.freshdesk.dto.TicketResponseDto;
@@ -48,6 +49,33 @@ public class FreshdeskService {
 		} catch (Exception e) {
 			log.error("Exception occurred while creating ticket: ", e);
 			throw new InternalServerException("Exception occurred while creating ticket", e);
+		}
+
+		return responseEntity.getBody();
+	}
+	
+	public TicketResponseDto getAllTickets(Map<String, String> filters) {
+		log.info("Fetching tickets with filters: {}", filters);
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(freshdeskApiUrl + "/api/v2/tickets");
+		filters.forEach(builder::queryParam);
+
+		String url = builder.toUriString();
+		log.info("URL: {}", url);
+
+		ResponseEntity<TicketResponseDto> responseEntity;
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization",
+				"Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
+		headers.add("Accept", "application/json");
+		headers.add("Content-Type", "application/json");
+
+		try {
+			HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+			responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, TicketResponseDto.class);
+		} catch (Exception e) {
+			log.error("Exception occurred while fetching tickets: ", e);
+			throw new InternalServerException("Exception occurred while fetching tickets", e);
 		}
 
 		return responseEntity.getBody();

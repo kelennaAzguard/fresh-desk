@@ -1,6 +1,8 @@
 package com.yuzee.app.freshdesk.processor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,35 @@ public class TicketProcessor {
 		}
 
 		return convertToResponseDto(ticketFromDb);
+	}
+	
+	public TicketResponseDto getAllTicket(String filter, Long requesterId, String email, String uniqueExternalId,
+			Long companyId, String updatedSince, String orderBy, String orderType, String include) {
+		log.info("inside get all ticket controller");
+		Map<String, String> filters = new HashMap<>();
+
+		if (filter != null)
+			filters.put("filter", filter);
+		if (requesterId != null)
+			filters.put("requester_id", requesterId.toString());
+		if (email != null)
+			filters.put("email", email);
+		if (uniqueExternalId != null)
+			filters.put("unique_external_id", uniqueExternalId);
+		if (companyId != null)
+			filters.put("company_id", companyId.toString());
+		if (updatedSince != null)
+			filters.put("updated_since", updatedSince);
+		if (orderBy != null)
+			filters.put("order_by", orderBy);
+		if (orderType != null)
+			filters.put("order_type", orderType);
+		if (include != null)
+			filters.put("include", include);
+
+		TicketResponseDto response = ticketService.getAllTickets(filters);
+		;
+		return null;
 	}
 
 	private Ticket populateTicketModelFromDto(TicketResponseDto ticketDto, String email) {
