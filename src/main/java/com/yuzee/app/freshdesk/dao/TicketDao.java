@@ -7,5 +7,7 @@ public interface TicketDao {
 	public Ticket createTicket(Ticket ticket);
 	
 	public Ticket getTicketByEmail(String email);
+	
+	public Ticket getTicketById(long ticketId);
 
 }

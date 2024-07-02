@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -80,4 +81,33 @@ public class FreshdeskService {
 
 		return responseEntity.getBody();
 	}
+	
+	  public TicketResponseDto getTicketById(Long id, String include) {
+	        log.info("Fetching ticket with id: {} and include: {}", id, include);
+
+	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(freshdeskApiUrl + "/api/v2/tickets/" + id);
+	        if (!ObjectUtils.isEmpty(include)) {
+	            builder.queryParam("include", include);
+	        }
+
+	        String url = builder.toUriString();
+	        log.info("URL: {}", url);
+
+	        ResponseEntity<TicketResponseDto> responseEntity;
+	        HttpHeaders headers = new HttpHeaders();
+			headers.add("Authorization",
+					"Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
+			headers.add("Accept", "application/json");
+			headers.add("Content-Type", "application/json");
+
+	        try {
+	            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+	            responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, TicketResponseDto.class);
+	        } catch (Exception e) {
+	            log.error("Exception occurred while fetching ticket: ", e);
+	            throw new InternalServerException("Exception occurred while fetching ticket", e);
+	        }
+
+	        return responseEntity.getBody();
+	    }
 }

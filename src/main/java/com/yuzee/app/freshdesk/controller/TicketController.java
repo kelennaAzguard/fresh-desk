@@ -82,8 +82,15 @@ public class TicketController implements TicketInterface {
 		// TODO Auto-generated method stub
 		TicketResponseDto createdTicket = ticketProcessor.getAllTicket(filter, requesterId, email, uniqueExternalId,
 				companyId, updatedSince, orderBy, orderType, include);
-		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
+		return new GenericResponseHandlers.Builder().setMessage("get all ticket")
 				.setStatus(HttpStatus.OK).setData(createdTicket).create();
+	}
+
+	@Override
+	public ResponseEntity<?> getTicketById(Long id, String include) {
+		TicketResponseDto getTicket = ticketProcessor.getTicketById(id,include);
+		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
+				.setStatus(HttpStatus.OK).setData(getTicket).create();
 	}
 
 }

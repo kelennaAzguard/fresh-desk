@@ -77,8 +77,8 @@ public class TicketProcessor {
 			filters.put("include", include);
 
 		TicketResponseDto response = ticketService.getAllTickets(filters);
-		;
-		return null;
+		
+		return response;
 	}
 
 	private Ticket populateTicketModelFromDto(TicketResponseDto ticketDto, String email) {
@@ -112,6 +112,7 @@ public class TicketProcessor {
 		ticket.setReplyCcEmails(ticketDto.getReplyCcEmails());
 		ticket.setSpam(ticketDto.getSpam());
 		ticket.setToEmails(ticketDto.getToEmails());
+		ticket.setTicketId(ticketDto.getId());
 
 		return ticket;
 	}
@@ -131,7 +132,7 @@ public class TicketProcessor {
 		responseDto.setStatus(ticket.getStatus());
 		responseDto.setSubject(ticket.getSubject());
 		responseDto.setCompanyId(ticket.getCompanyId());
-		responseDto.setId(ticket.getId());
+		responseDto.setId(ticket.getTicketId());
 		responseDto.setType(ticket.getType());
 		responseDto.setToEmails(ticket.getToEmails());
 		responseDto.setProductId(ticket.getProductId());
@@ -148,6 +149,19 @@ public class TicketProcessor {
 		responseDto.setAttachments(ticket.getAttachments());
 
 		return responseDto;
+	}
+
+	public TicketResponseDto getTicketById(Long id, String include) {
+		log.info("getting ticket by id from db");
+		Ticket ticketFromDb = ticketDao.getTicketById(id);
+		// getting ticket id from tick api ..
+		TicketResponseDto getTicket = ticketService.getTicketById(id, include);
+		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
+			log.info("ticket id  is null in db or freshdesk......");
+			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+
+		}
+		return getTicket;
 	}
 
 }

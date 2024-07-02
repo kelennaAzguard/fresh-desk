@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import com.yuzee.app.freshdesk.model.Ticket;
 
 @Repository
-public interface TicketRepository extends MongoRepository<Ticket, Long> {
+public interface TicketRepository extends MongoRepository<Ticket, String> {
 
 }
