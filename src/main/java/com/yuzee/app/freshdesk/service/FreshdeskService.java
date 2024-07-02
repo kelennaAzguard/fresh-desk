@@ -32,17 +32,20 @@ public class FreshdeskService {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	  private HttpHeaders createHeaders() {
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
+	        headers.add("Accept", "application/json");
+	        return headers;
+	    }
 
 	public TicketResponseDto createTicket(TicketDto ticketDto) {
 		log.info("Creating ticket with details: {}", ticketDto);
 
 		String CREATE_TICKET_URL = freshdeskApiUrl + "/api/v2/tickets";
 		ResponseEntity<TicketResponseDto> responseEntity = null;
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization",
-				"Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
-		headers.add("Accept", "application/json");
-		headers.add("Content-Type", "application/json");
+		HttpHeaders headers = createHeaders();
 
 		try {
 			HttpEntity<TicketDto> requestEntity = new HttpEntity<>(ticketDto, headers);
@@ -65,11 +68,7 @@ public class FreshdeskService {
 		log.info("URL: {}", url);
 
 		ResponseEntity<TicketResponseDto> responseEntity;
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization",
-				"Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
-		headers.add("Accept", "application/json");
-		headers.add("Content-Type", "application/json");
+		HttpHeaders headers = createHeaders();
 
 		try {
 			HttpEntity<String> requestEntity = new HttpEntity<>(headers);
@@ -94,12 +93,7 @@ public class FreshdeskService {
 	        log.info("URL: {}", url);
 
 	        ResponseEntity<TicketResponseDto> responseEntity;
-	        HttpHeaders headers = new HttpHeaders();
-			headers.add("Authorization",
-					"Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
-			headers.add("Accept", "application/json");
-			headers.add("Content-Type", "application/json");
-
+	        HttpHeaders headers = createHeaders();
 	        try {
 	            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 	            responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, TicketResponseDto.class);
@@ -110,4 +104,27 @@ public class FreshdeskService {
 
 	        return responseEntity.getBody();
 	    }
+	  
+		public void deleteTicketById(Long id) {
+			log.info("Deleting ticket with id: {}", id);
+
+			String DELETE_TICKET_URL = freshdeskApiUrl + "/api/v2/tickets/" + id;
+
+			HttpHeaders headers = createHeaders();
+
+			try {
+				HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+				ResponseEntity<Void> responseEntity = restTemplate.exchange(DELETE_TICKET_URL, HttpMethod.DELETE,
+						requestEntity, Void.class);
+
+				if (responseEntity.getStatusCode().is2xxSuccessful()) {
+					log.info("Ticket with id: {} deleted successfully", id);
+				} else {
+					throw new InternalServerException("Failed to delete ticket");
+				}
+			} catch (Exception e) {
+				log.error("Exception occurred while deleting ticket: ", e);
+				throw new InternalServerException("Exception occurred while deleting ticket", e);
+			}
+		}
 }

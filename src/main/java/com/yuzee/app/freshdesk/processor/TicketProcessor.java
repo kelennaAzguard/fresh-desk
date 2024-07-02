@@ -81,6 +81,7 @@ public class TicketProcessor {
 		return response;
 	}
 
+
 	private Ticket populateTicketModelFromDto(TicketResponseDto ticketDto, String email) {
 		Ticket ticket = new Ticket();
 		ticket.setName(ticketDto.getSubject());
@@ -162,6 +163,20 @@ public class TicketProcessor {
 
 		}
 		return getTicket;
+	}
+	
+	public void deleteTicketById(Long id) {
+		log.info("getting ticket by id from db");
+		Ticket ticketFromDb = ticketDao.getTicketById(id);
+		// getting ticket id from tick api ..
+		TicketResponseDto getTicket = ticketService.getTicketById(id, null);
+		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
+			log.info("ticket id  is null in db or freshdesk......");
+			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+
+		}
+		ticketService.deleteTicketById(id);
+
 	}
 
 }

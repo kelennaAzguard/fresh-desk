@@ -9,5 +9,7 @@ public interface TicketDao {
 	public Ticket getTicketByEmail(String email);
 	
 	public Ticket getTicketById(long ticketId);
+	
+	public void deleteById(long ticketId);
 
 }

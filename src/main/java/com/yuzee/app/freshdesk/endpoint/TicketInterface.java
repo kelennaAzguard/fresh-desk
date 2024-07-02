@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.PathVariable;
 import com.yuzee.app.freshdesk.dto.TicketDto;
 import com.yuzee.common.lib.exception.IOException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RequestMapping("/api/v1")
 public interface TicketInterface {
@@ -32,5 +33,8 @@ public interface TicketInterface {
 	@GetMapping("/tickets/{id}")
 	public ResponseEntity<?> getTicketById(@PathVariable Long id,
 			@RequestParam(required = false) String include);
+	
+	@DeleteMapping("/tickets/{id}")
+    public ResponseEntity<?> deleteTicketById(@PathVariable Long id);
 
 }

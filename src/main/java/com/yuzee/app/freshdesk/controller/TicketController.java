@@ -93,4 +93,11 @@ public class TicketController implements TicketInterface {
 				.setStatus(HttpStatus.OK).setData(getTicket).create();
 	}
 
+	@Override
+	public ResponseEntity<?> deleteTicketById(Long id) {
+	   ticketProcessor.deleteTicketById(id);
+		return new GenericResponseHandlers.Builder().setMessage("delete ticket by id")
+				.setStatus(HttpStatus.OK).create();
+	}
+
 }
