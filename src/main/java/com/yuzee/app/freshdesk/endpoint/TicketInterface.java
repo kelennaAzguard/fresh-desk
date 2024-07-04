@@ -19,9 +19,10 @@ public interface TicketInterface {
 	public ResponseEntity<?> createTicket(@RequestBody TicketDto ticketDto);
 
 	@PostMapping("/create-attachment")
-	public ResponseEntity<?> createTicketWithAttachments(@RequestParam("email") String email,
-			@RequestParam("subject") String subject, @RequestParam("description") String description,
-			@RequestParam("attachments") MultipartFile[] attachments) throws IOException, java.io.IOException;
+	  public ResponseEntity<?> createTicketWithAttachments(@RequestParam("email") String email,
+              @RequestParam("subject") String subject,
+              @RequestParam("description") String description,
+              @RequestParam("attachments[]") MultipartFile[] attachments) throws IOException, java.io.IOException;
 
 	@GetMapping("/tickets")
 	public ResponseEntity<?> getTickets(@RequestParam(required = false) String filter,

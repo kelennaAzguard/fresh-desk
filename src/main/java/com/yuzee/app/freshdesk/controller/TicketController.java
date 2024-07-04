@@ -50,30 +50,12 @@ public class TicketController implements TicketInterface {
 		log.info("inside group dialog controller");
 		log.info("Creating ticket with email: {}, subject: {}, description: {}", email, subject, description);
 
-		// Convert MultipartFiles to Attachments using streams
-		List<Attachment> attachments = Arrays.stream(multipartFiles).map(file -> {
-
-			Attachment attachment = new Attachment();
-			attachment.setName(file.getOriginalFilename());
-			attachment.setContentType(file.getContentType());
-			attachment.setFileSize(file.getSize());
-			attachment.setAttachmentUrl(file.getOriginalFilename());
-			// Set createdAt and updatedAt as needed
-			attachment.setCreatedAt(LocalDateTime.now());
-			attachment.setUpdatedAt(LocalDateTime.now());
-
-			return attachment;
-
-		}).collect(Collectors.toList());
-		TicketDto ticketDto = new TicketDto();
-		ticketDto.setAttachments(attachments);
-		ticketDto.setSubject(subject);
-		ticketDto.setDescription(description);
-		ticketDto.setEmail(email);
-		// Call ticketProcessor to create ticket with attachments
-		TicketResponseDto createdTicket = ticketProcessor.createTicket(ticketDto);
-		return new GenericResponseHandlers.Builder().setMessage("Ticket attachment created successfully")
-				.setStatus(HttpStatus.OK).setData(createdTicket).create();
+		log.info("inside group dialog controller");
+		TicketResponseDto createTicketDto = ticketProcessor.createTicketAttachments(email, subject, description,
+				multipartFiles);
+		return new GenericResponseHandlers.Builder()
+				.setMessage(messageTranslator.toLocale("group.created.successufully")).setStatus(HttpStatus.OK)
+				.setData(createTicketDto).create();
 	}
 
 	@Override
