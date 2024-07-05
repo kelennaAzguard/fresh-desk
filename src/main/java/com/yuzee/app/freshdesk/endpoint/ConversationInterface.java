@@ -37,7 +37,7 @@ public interface ConversationInterface {
 			@RequestBody ConverstionRequestDto conversationRequestDto);
 
 	@PutMapping("conversation-attachment/{conversationId}")
-	public ResponseEntity<?> updateConversation(@PathVariable long conversationId,
+	public ResponseEntity<?> updateConversationAttachment(@PathVariable long conversationId,
 			@RequestParam("body") String body, @RequestParam("attachments") MultipartFile[] attachments) throws IOException;
 	
 	@DeleteMapping("delete/{conversationId}")

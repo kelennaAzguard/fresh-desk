@@ -57,7 +57,7 @@ public class ConversationController  implements ConversationInterface{
 	}
 
 	@Override
-	public ResponseEntity<?> updateConversation(long conversationId, String body, MultipartFile[] attachments) throws IOException {
+	public ResponseEntity<?> updateConversationAttachment(long conversationId, String body, MultipartFile[] attachments) throws IOException {
 		ConversationResponseDto createReply = conversationProcessor.updateConversationAttachment(conversationId,body,attachments);
 		return new GenericResponseHandlers.Builder().setMessage("update conversation successfull")
 				.setStatus(HttpStatus.OK).setData(createReply).create();
