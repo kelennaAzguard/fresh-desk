@@ -37,24 +37,24 @@ public class TicketController implements TicketInterface {
 	@Override
 	public ResponseEntity<?> createTicket(TicketDto ticketDto) {
 		// TODO Auto-generated method stub
-		log.info("inside group dialog controller");
+		log.info("inside create ticket controller");
 		TicketResponseDto createTicketDto = ticketProcessor.createTicket(ticketDto);
 		return new GenericResponseHandlers.Builder()
-				.setMessage(messageTranslator.toLocale("group.created.successufully")).setStatus(HttpStatus.OK)
+				.setMessage(messageTranslator.toLocale("ticket.created.successufully")).setStatus(HttpStatus.OK)
 				.setData(createTicketDto).create();
 	}
 
 	@Override
 	public ResponseEntity<?> createTicketWithAttachments(String email, String subject, String description,
 			MultipartFile[] multipartFiles) throws IOException, java.io.IOException {
-		log.info("inside group dialog controller");
+		log.info("inside createTicketWithAttachments controller");
 		log.info("Creating ticket with email: {}, subject: {}, description: {}", email, subject, description);
 
 		log.info("inside group dialog controller");
 		TicketResponseDto createTicketDto = ticketProcessor.createTicketAttachments(email, subject, description,
 				multipartFiles);
 		return new GenericResponseHandlers.Builder()
-				.setMessage(messageTranslator.toLocale("group.created.successufully")).setStatus(HttpStatus.OK)
+				.setMessage(messageTranslator.toLocale("createTicketWithAttachments.successufully")).setStatus(HttpStatus.OK)
 				.setData(createTicketDto).create();
 	}
 

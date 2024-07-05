@@ -24,10 +24,10 @@ public interface ConversationInterface {
 	public ResponseEntity<?> replyToTicketWithAttachments(@PathVariable("ticketId") long ticketId,
 			@RequestParam("body") String body, @RequestParam("attachments") MultipartFile[] attachments) throws IOException;
 
-	@PostMapping("/{ticketId}/notes")
+	@PostMapping("tickets/{ticketId}/notes")
 	public ResponseEntity<?> addNoteToTicket(@PathVariable long ticketId, @RequestBody ConverstionRequestDto noteDto);
 	
-	@PostMapping("/{ticketId}/notes-attachment")
+	@PostMapping("tickets/{ticketId}/notes-attachment")
 	public ResponseEntity<?> addNoteAttachmentToTicket(@PathVariable long ticketId, @RequestParam("body") String body,
 			@RequestParam("notify_emails[]") String notifyEmail,
 			@RequestParam("attachments[]") MultipartFile[] attachments) throws IOException;

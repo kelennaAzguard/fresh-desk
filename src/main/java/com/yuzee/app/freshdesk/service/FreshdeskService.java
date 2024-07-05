@@ -24,6 +24,7 @@ import com.yuzee.app.freshdesk.dto.ConversationResponseDto;
 import com.yuzee.app.freshdesk.dto.ConverstionRequestDto;
 import com.yuzee.app.freshdesk.dto.TicketDto;
 import com.yuzee.app.freshdesk.dto.TicketResponseDto;
+import com.yuzee.app.freshdesk.dto.WatcherRequestDto;
 import com.yuzee.common.lib.exception.InternalServerException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -160,8 +161,8 @@ public class FreshdeskService {
 
 			try {
 				HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-				ResponseEntity<Void> responseEntity = restTemplate.exchange(DELETE_TICKET_URL, HttpMethod.DELETE,
-						requestEntity, Void.class);
+				ResponseEntity<String> responseEntity = restTemplate.exchange(DELETE_TICKET_URL, HttpMethod.DELETE,
+						requestEntity, String.class);
 
 				if (responseEntity.getStatusCode().is2xxSuccessful()) {
 					log.info("Ticket with id: {} deleted successfully", id);
@@ -333,12 +334,30 @@ public class FreshdeskService {
 		        HttpHeaders headers = new HttpHeaders();
 		        headers.setBasicAuth(freshdeskApiKey, "X");
 
-		        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+		        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-		        ResponseEntity<Void> responseEntity = restTemplate.exchange(deleteConversationUrl, HttpMethod.DELETE, requestEntity, Void.class);
+		        ResponseEntity<String> responseEntity = restTemplate.exchange(deleteConversationUrl, HttpMethod.DELETE, requestEntity, String.class);
 
 		        if (responseEntity.getStatusCode() != HttpStatus.NO_CONTENT) {
 		            throw new RuntimeException("Failed to delete conversation. Status code: " + responseEntity.getStatusCode());
 		        }
 		    }
+		   
+			public void addWatcherToTicket(long ticketId, WatcherRequestDto watcherRequestDto) {
+				String addWatcherUrl = freshdeskApiUrl + "/tickets/" + ticketId + "/watch";
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				headers.setBasicAuth(freshdeskApiKey, "X");
+
+				HttpEntity<WatcherRequestDto> requestEntity = new HttpEntity<>(watcherRequestDto, headers);
+
+				ResponseEntity<String> responseEntity = restTemplate.exchange(addWatcherUrl, HttpMethod.POST,
+						requestEntity, String.class);
+
+				if (responseEntity.getStatusCode() != HttpStatus.NO_CONTENT) {
+					throw new RuntimeException(
+							"Failed to add watcher to ticket. Status code: " + responseEntity.getStatusCode());
+				}
+			}
 }
