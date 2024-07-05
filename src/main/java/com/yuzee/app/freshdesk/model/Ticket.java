@@ -9,13 +9,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import 
+org.springframework.data.annotation.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "ticket")
 public class Ticket {
-	private Long id;
+	@Id
+	private String id;
+	private Long ticketId;
 	private String name;
 	private Long requesterId;
 	private String email;

@@ -28,4 +28,19 @@ public class TicketDaoImpl implements TicketDao {
 		return mongoTemplate.findOne(query, Ticket.class);
 	}
 
+	@Override
+	public Ticket getTicketById(long id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("ticketId").is(id));
+		return mongoTemplate.findOne(query, Ticket.class);
+	}
+
+	@Override
+	public void deleteById(long ticketId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("ticketId").is(ticketId));
+		mongoTemplate.remove(query, Ticket.class);
+		
+	}
+
 }
