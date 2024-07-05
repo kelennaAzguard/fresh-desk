@@ -1,13 +1,10 @@
 package com.yuzee.app.freshdesk.processor;
 
 import java.io.IOException;
-
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.amazonaws.services.s3.model.ObjectTagging;
 import com.yuzee.app.freshdesk.dao.ConversationDao;
 import com.yuzee.app.freshdesk.dao.TicketDao;
 import com.yuzee.app.freshdesk.dto.ConversationResponseDto;
@@ -18,7 +15,6 @@ import com.yuzee.app.freshdesk.service.FreshdeskService;
 import com.yuzee.app.freshdesk.utils.ObjectConversionUtils;
 import com.yuzee.common.lib.exception.NotFoundException;
 import com.yuzee.local.config.MessageTranslator;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -112,6 +108,65 @@ public class ConversationProcessor {
 		Conversation conversationModel = ObjectConversionUtils.convertToConversation(note);
 		conversationDao.saveConversaation(conversationModel);
 		return note;
+	}
+
+	public ConversationResponseDto updateConversation(long conversationId,
+			ConverstionRequestDto conversationRequestDto) {
+		log.info("inside update conversation method");
+		Conversation conversion = conversationDao.getConversationById(conversationId);
+		if (ObjectUtils.isNotEmpty(conversion)) {
+			log.info("conversion id is empty in db........");
+			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
+		}
+		log.info("calling update conversation external api service");
+		ConversationResponseDto conversationFrmService = ticketService.updateConversation(conversationId,
+				conversationRequestDto);
+		if (ObjectUtils.isEmpty(conversationFrmService)) {
+			log.info("error while creating conversation");
+			throw new NotFoundException(messageTranslator.toLocale("error while creating conversation"));
+		}
+		
+		Conversation conversationModel = ObjectConversionUtils.convertToConversation(conversationFrmService);
+		conversationDao.saveConversaation(conversationModel);
+		return conversationFrmService;
+	}
+
+	public ConversationResponseDto updateConversationAttachment(long conversationId, String body,
+			MultipartFile[] attachments) throws IOException {
+		log.info("inside update conversation attachment method");
+		Conversation conversion = conversationDao.getConversationById(conversationId);
+		if (ObjectUtils.isNotEmpty(conversion)) {
+			log.info("conversion id is empty in db........");
+			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
+		}
+		log.info("calling update conversation external api service");
+		ConversationResponseDto conversationFrmService = ticketService.updateConversationAttachment(conversationId, body, attachments);
+		if (ObjectUtils.isEmpty(conversationFrmService)) {
+			log.info("error while creating conversation");
+			throw new NotFoundException(messageTranslator.toLocale("error while creating conversation"));
+		}
+		
+		Conversation conversationModel = ObjectConversionUtils.convertToConversation(conversationFrmService);
+		conversationDao.saveConversaation(conversationModel);
+		return conversationFrmService;
+	}
+
+	public void deleteConversation(long conversationId) {
+		log.info("inside delete conversation  method");
+		Conversation conversion = conversationDao.getConversationById(conversationId);
+		if (ObjectUtils.isNotEmpty(conversion)) {
+			log.info("conversion id is empty in db........");
+			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
+		}
+		log.info("calling update conversation external api service");
+		try {
+			ticketService.deleteConversation(conversationId);
+		} catch (Exception e) {
+			log.info("error while deleting conversation");
+			throw new NotFoundException(messageTranslator.toLocale("error while deleting conversation"));
+		}
+		conversationDao.deleteConversationById(conversationId);
+     
 	}
 
 }

@@ -43,8 +43,8 @@ public class FreshdeskService {
 	
 	  private HttpHeaders createHeaders() {
 	        HttpHeaders headers = new HttpHeaders();
-	        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((freshdeskApiKey + ":X").getBytes()));
-	        headers.add("Accept", "application/json");
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+	        headers.setBasicAuth(freshdeskApiKey, "X");
 	        return headers;
 	    }
 
@@ -274,4 +274,71 @@ public class FreshdeskService {
 						"Failed to create note with attachments. Status code: " + responseEntity.getStatusCode());
 			}
 		}
+		
+		public ConversationResponseDto updateConversation(long conversationId, ConverstionRequestDto conversationRequestDto) {
+	        String updateConversationUrl = freshdeskApiUrl + "/conversations/" + conversationId;
+	        
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+	        headers.setBasicAuth(freshdeskApiKey, "X");
+
+	        // Create request entity
+	        HttpEntity<ConverstionRequestDto> requestEntity = new HttpEntity<>(conversationRequestDto, headers);
+
+	        // Make the API call
+	        ResponseEntity<ConversationResponseDto> responseEntity = restTemplate.exchange(updateConversationUrl, HttpMethod.PUT, requestEntity, ConversationResponseDto.class);
+
+	        // Check response status
+	        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+	            return responseEntity.getBody();
+	        } else {
+	            throw new RuntimeException("Failed to update conversation. Status code: " + responseEntity.getStatusCode());
+	        }
+	    }
+		
+		   public ConversationResponseDto updateConversationAttachment(long conversationId, String body, MultipartFile[] attachments) throws IOException {
+		        String updateConversationUrl = freshdeskApiUrl + "/conversations/" + conversationId;
+		        
+		        HttpHeaders headers = new HttpHeaders();
+		        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		        headers.setBasicAuth(freshdeskApiKey, "X");
+
+		        MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+		        bodyMap.add("body", body);
+
+		        for (MultipartFile file : attachments) {
+		            ByteArrayResource fileAsResource = new ByteArrayResource(file.getBytes()) {
+		                @Override
+		                public String getFilename() {
+		                    return file.getOriginalFilename();
+		                }
+		            };
+		            bodyMap.add("attachments[]", fileAsResource);
+		        }
+
+		        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+		        ResponseEntity<ConversationResponseDto> responseEntity = restTemplate.exchange(updateConversationUrl, HttpMethod.PUT, requestEntity, ConversationResponseDto.class);
+
+		        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+		            return responseEntity.getBody();
+		        } else {
+		            throw new RuntimeException("Failed to update conversation with attachments. Status code: " + responseEntity.getStatusCode());
+		        }
+		    }
+		   
+		   public void deleteConversation(long conversationId) {
+		        String deleteConversationUrl = freshdeskApiUrl + "/conversations/" + conversationId;
+
+		        HttpHeaders headers = new HttpHeaders();
+		        headers.setBasicAuth(freshdeskApiKey, "X");
+
+		        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+		        ResponseEntity<Void> responseEntity = restTemplate.exchange(deleteConversationUrl, HttpMethod.DELETE, requestEntity, Void.class);
+
+		        if (responseEntity.getStatusCode() != HttpStatus.NO_CONTENT) {
+		            throw new RuntimeException("Failed to delete conversation. Status code: " + responseEntity.getStatusCode());
+		        }
+		    }
 }

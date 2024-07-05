@@ -8,6 +8,8 @@ public interface ConversationDao {
 	
 	public Conversation getConversationById(Long id);
 	
+	public void deleteConversationById(long id);
+	
    
 
 }

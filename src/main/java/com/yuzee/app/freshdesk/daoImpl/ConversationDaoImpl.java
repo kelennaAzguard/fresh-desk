@@ -32,4 +32,10 @@ public class ConversationDaoImpl implements ConversationDao {
 		return mongoTemplate.findOne(query, Conversation.class);
 	}
 
+	@Override
+	public void deleteConversationById(long id) {
+		 conversationRepository.deleteById(id);
+		
+	}
+
 }

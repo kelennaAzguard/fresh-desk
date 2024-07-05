@@ -49,4 +49,25 @@ public class ConversationController  implements ConversationInterface{
 				.setStatus(HttpStatus.OK).setData(createReply).create();
 	}
 
+	@Override
+	public ResponseEntity<?> updateConversation(long conversationId, ConverstionRequestDto conversationRequestDto) {
+		ConversationResponseDto createReply = conversationProcessor.updateConversation(conversationId,conversationRequestDto);
+		return new GenericResponseHandlers.Builder().setMessage("update conversation successfull")
+				.setStatus(HttpStatus.OK).setData(createReply).create();
+	}
+
+	@Override
+	public ResponseEntity<?> updateConversation(long conversationId, String body, MultipartFile[] attachments) throws IOException {
+		ConversationResponseDto createReply = conversationProcessor.updateConversationAttachment(conversationId,body,attachments);
+		return new GenericResponseHandlers.Builder().setMessage("update conversation successfull")
+				.setStatus(HttpStatus.OK).setData(createReply).create();
+	}
+
+	@Override
+	public ResponseEntity<?> deleteConversation(long conversationId) {
+		conversationProcessor.deleteConversation(conversationId);
+		return new GenericResponseHandlers.Builder().setMessage("delete conversation successfull")
+				.setStatus(HttpStatus.OK).create();
+	}
+
 }
