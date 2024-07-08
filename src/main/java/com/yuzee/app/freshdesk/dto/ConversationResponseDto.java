@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yuzee.app.freshdesk.model.Attachment;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ConversationResponseDto {
 
     @JsonProperty("body_text")

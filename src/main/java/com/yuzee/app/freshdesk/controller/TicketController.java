@@ -62,7 +62,7 @@ public class TicketController implements TicketInterface {
 	public ResponseEntity<?> getTickets(String filter, Long requesterId, String email, String uniqueExternalId,
 			Long companyId, String updatedSince, String orderBy, String orderType, String include) {
 		// TODO Auto-generated method stub
-		TicketResponseDto createdTicket = ticketProcessor.getAllTicket(filter, requesterId, email, uniqueExternalId,
+		List<TicketResponseDto> createdTicket = ticketProcessor.getAllTicket(filter, requesterId, email, uniqueExternalId,
 				companyId, updatedSince, orderBy, orderType, include);
 		return new GenericResponseHandlers.Builder().setMessage("get all ticket")
 				.setStatus(HttpStatus.OK).setData(createdTicket).create();

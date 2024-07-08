@@ -76,8 +76,8 @@ public class ConversationProcessor {
 		log.info("checking if ticket exist in db");
 		Ticket ticket = ticketDao.getTicketById(ticketId);
 		if (ObjectUtils.isEmpty(ticket)) {
-			log.info("ticket id is empty in db and freshdesk......");
-			new NotFoundException(messageTranslator.toLocale("ticket id is empty in db and freshdesk"));
+			log.info("Ticket ID {} not found in database and Freshdesk", ticketId);
+			throw new NotFoundException(messageTranslator.toLocale("ticket.id.not.found"));
 		}
 		log.info("calling create note external api service");
 		ConversationResponseDto note = ticketService.createNoteOnTicket(ticketId, noteDto);
@@ -95,8 +95,8 @@ public class ConversationProcessor {
 		log.info("checking if ticket exist in db");
 		Ticket ticket = ticketDao.getTicketById(ticketId);
 		if (ObjectUtils.isEmpty(ticket)) {
-			log.info("ticket id is empty in db and freshdesk......");
-			new NotFoundException(messageTranslator.toLocale("ticket id is empty in db and freshdesk"));
+			log.info("Ticket ID {} not found in database and Freshdesk", ticketId);
+			throw new NotFoundException(messageTranslator.toLocale("ticket.id.not.found"));
 		}
 		log.info("calling create note external api service");
 		ConversationResponseDto note = ticketService.addNoteAttachmentToTicket(ticketId, body, notifyEmail,
@@ -114,7 +114,7 @@ public class ConversationProcessor {
 			ConverstionRequestDto conversationRequestDto) {
 		log.info("inside update conversation method");
 		Conversation conversion = conversationDao.getConversationById(conversationId);
-		if (ObjectUtils.isNotEmpty(conversion)) {
+		if (ObjectUtils.isEmpty(conversion)) {
 			log.info("conversion id is empty in db........");
 			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
 		}
@@ -125,7 +125,7 @@ public class ConversationProcessor {
 			log.info("error while creating conversation");
 			throw new NotFoundException(messageTranslator.toLocale("error while creating conversation"));
 		}
-		
+
 		Conversation conversationModel = ObjectConversionUtils.convertToConversation(conversationFrmService);
 		conversationDao.saveConversaation(conversationModel);
 		return conversationFrmService;
@@ -135,17 +135,18 @@ public class ConversationProcessor {
 			MultipartFile[] attachments) throws IOException {
 		log.info("inside update conversation attachment method");
 		Conversation conversion = conversationDao.getConversationById(conversationId);
-		if (ObjectUtils.isNotEmpty(conversion)) {
+		if (ObjectUtils.isEmpty(conversion)) {
 			log.info("conversion id is empty in db........");
 			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
 		}
 		log.info("calling update conversation external api service");
-		ConversationResponseDto conversationFrmService = ticketService.updateConversationAttachment(conversationId, body, attachments);
+		ConversationResponseDto conversationFrmService = ticketService.updateConversationAttachment(conversationId,
+				body, attachments);
 		if (ObjectUtils.isEmpty(conversationFrmService)) {
 			log.info("error while creating conversation");
 			throw new NotFoundException(messageTranslator.toLocale("error while creating conversation"));
 		}
-		
+
 		Conversation conversationModel = ObjectConversionUtils.convertToConversation(conversationFrmService);
 		conversationDao.saveConversaation(conversationModel);
 		return conversationFrmService;
@@ -154,19 +155,14 @@ public class ConversationProcessor {
 	public void deleteConversation(long conversationId) {
 		log.info("inside delete conversation  method");
 		Conversation conversion = conversationDao.getConversationById(conversationId);
-		if (ObjectUtils.isNotEmpty(conversion)) {
+		if (ObjectUtils.isEmpty(conversion)) {
 			log.info("conversion id is empty in db........");
 			throw new NotFoundException(messageTranslator.toLocale("conversion id is empty in db........"));
 		}
 		log.info("calling update conversation external api service");
-		try {
-			ticketService.deleteConversation(conversationId);
-		} catch (Exception e) {
-			log.info("error while deleting conversation");
-			throw new NotFoundException(messageTranslator.toLocale("error while deleting conversation"));
-		}
+		ticketService.deleteConversation(conversationId);
 		conversationDao.deleteConversationById(conversationId);
-     
+
 	}
 
 }

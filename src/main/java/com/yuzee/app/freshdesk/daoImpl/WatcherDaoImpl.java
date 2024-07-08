@@ -1,9 +1,12 @@
 package com.yuzee.app.freshdesk.daoImpl;
 
+import org.springframework.stereotype.Service;
+
 import com.yuzee.app.freshdesk.dao.WatcherDao;
 import com.yuzee.app.freshdesk.model.Watcher;
 import com.yuzee.app.freshdesk.repository.WatcherRepository;
 
+@Service
 public class WatcherDaoImpl implements WatcherDao {
 	
 	private WatcherRepository watcherRepository;

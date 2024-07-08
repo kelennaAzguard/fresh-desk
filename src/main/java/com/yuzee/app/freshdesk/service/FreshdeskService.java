@@ -1,6 +1,6 @@
 package com.yuzee.app.freshdesk.service;
 
-import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import java.io.IOException;
 import com.yuzee.app.freshdesk.dto.ConversationResponseDto;
@@ -25,6 +26,7 @@ import com.yuzee.app.freshdesk.dto.ConverstionRequestDto;
 import com.yuzee.app.freshdesk.dto.TicketDto;
 import com.yuzee.app.freshdesk.dto.TicketResponseDto;
 import com.yuzee.app.freshdesk.dto.WatcherRequestDto;
+import com.yuzee.common.lib.dto.GenericWrapperDto;
 import com.yuzee.common.lib.exception.InternalServerException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -76,36 +78,32 @@ public class FreshdeskService {
 
         MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         bodyMap.add("email", email);
-        bodyMap.add("subject", subject);
-        bodyMap.add("description", description);
+		bodyMap.add("subject", subject);
+		bodyMap.add("description", description);
 
-        for (MultipartFile file : attachments) {
-            ByteArrayResource fileAsResource = new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename();
-                }
-            };
-            bodyMap.add("attachments[]", fileAsResource);
-        }
-    	try {
+		for (MultipartFile file : attachments) {
+			ByteArrayResource fileAsResource = new ByteArrayResource(file.getBytes()) {
+				@Override
+				public String getFilename() {
+					return file.getOriginalFilename();
+				}
+			};
+			bodyMap.add("attachments[]", fileAsResource);
+		}
+		try {
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        responseEntity = restTemplate.exchange(createTicketUrl, HttpMethod.POST, requestEntity, TicketResponseDto.class);
-    	}
-    	catch (Exception e) {
+			responseEntity = restTemplate.exchange(createTicketUrl, HttpMethod.POST, requestEntity,
+					TicketResponseDto.class);
+		} catch (Exception e) {
 			log.error("Exception occurred while creating tickets: ", e);
 			throw new InternalServerException("Exception occurred while creating tickets", e);
 		}
-        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-            return responseEntity.getBody();
-        } else {
-            throw new RuntimeException("Failed to create ticket with attachments. Status code: " + responseEntity.getStatusCode());
-        }
-    }
+		return responseEntity.getBody();
+	}
 	
-	public TicketResponseDto getAllTickets(Map<String, String> filters) {
+	public List<TicketResponseDto> getAllTickets(Map<String, String> filters) {
 		log.info("Fetching tickets with filters: {}", filters);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(freshdeskApiUrl + "/api/v2/tickets");
@@ -114,18 +112,19 @@ public class FreshdeskService {
 		String url = builder.toUriString();
 		log.info("URL: {}", url);
 
-		ResponseEntity<TicketResponseDto> responseEntity;
+		ResponseEntity<GenericWrapperDto<List<TicketResponseDto>>> responseEntity;
 		HttpHeaders headers = createHeaders();
 
 		try {
 			HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-			responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, TicketResponseDto.class);
+			responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, new ParameterizedTypeReference<GenericWrapperDto<List<TicketResponseDto>>>() {
+			});
 		} catch (Exception e) {
 			log.error("Exception occurred while fetching tickets: ", e);
 			throw new InternalServerException("Exception occurred while fetching tickets", e);
 		}
 
-		return responseEntity.getBody();
+		return responseEntity.getBody().getData();
 	}
 	
 	  public TicketResponseDto getTicketById(Long id, String include) {

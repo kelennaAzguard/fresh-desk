@@ -3,6 +3,7 @@ package com.yuzee.app.freshdesk.processor;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -68,13 +69,17 @@ public class TicketProcessor {
 
 		TicketResponseDto createticket = ticketService.createTicketWithAttachments(email, subject, description,
 				multipartFiles);
+		if (ObjectUtils.isEmpty(createticket)) {
+			log.info("error while creating ticket");
+			throw new NotFoundException(messageTranslator.toLocale("error while creating ticket"));
+		}
 		Ticket ticketFromFreshDeskDto = populateTicketModelFromDto(createticket, email);
 		Ticket ticketFromDb = ticketDao.createTicket(ticketFromFreshDeskDto);
 
 		return convertToResponseDto(ticketFromDb);
 	}
 
-	public TicketResponseDto getAllTicket(String filter, Long requesterId, String email, String uniqueExternalId,
+	public List<TicketResponseDto> getAllTicket(String filter, Long requesterId, String email, String uniqueExternalId,
 			Long companyId, String updatedSince, String orderBy, String orderType, String include) {
 		log.info("inside get all ticket controller");
 		Map<String, String> filters = new HashMap<>();
@@ -98,7 +103,7 @@ public class TicketProcessor {
 		if (include != null)
 			filters.put("include", include);
 
-		TicketResponseDto response = ticketService.getAllTickets(filters);
+		List<TicketResponseDto> response = ticketService.getAllTickets(filters);
 
 		return response;
 	}
@@ -110,7 +115,7 @@ public class TicketProcessor {
 		TicketResponseDto getTicket = ticketService.getTicketById(id, include);
 		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
 			log.info("ticket id  is null in db or freshdesk......");
-			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+			throw new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
 
 		}
 		return getTicket;
@@ -123,7 +128,7 @@ public class TicketProcessor {
 		TicketResponseDto getTicket = ticketService.getTicketById(id, null);
 		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
 			log.info("ticket id  is null in db or freshdesk......");
-			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+			throw new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
 
 		}
 		ticketService.deleteTicketById(id);
@@ -169,7 +174,9 @@ public class TicketProcessor {
 	// Method to convert Ticket entity to TicketResponseDto
 	public TicketResponseDto convertToResponseDto(Ticket ticket) {
 		TicketResponseDto responseDto = new TicketResponseDto();
+		if(ObjectUtils.isNotEmpty(ticket.getCcEmails())){
 		responseDto.setCcEmails(ticket.getCcEmails());
+		}
 		responseDto.setFwdEmails(ticket.getFwdEmails());
 		responseDto.setReplyCcEmails(ticket.getReplyCcEmails());
 		responseDto.setEmailConfigId(ticket.getEmailConfigId());
