@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>com.yuzee.common</groupId>
 			<artifactId>yuzee-backend-common-lib</artifactId>
-			<version>0.0.208-SNAPSHOT</version>
+			<version>0.0.210-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>

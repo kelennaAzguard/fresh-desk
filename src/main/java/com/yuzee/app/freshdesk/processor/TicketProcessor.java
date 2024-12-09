@@ -1,10 +1,15 @@
 package com.yuzee.app.freshdesk.processor;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.yuzee.app.freshdesk.dao.TicketDao;
 import com.yuzee.app.freshdesk.dto.TicketDto;
 import com.yuzee.app.freshdesk.dto.TicketResponseDto;
@@ -50,6 +55,81 @@ public class TicketProcessor {
 		return convertToResponseDto(ticketFromDb);
 	}
 
+	public TicketResponseDto createTicketAttachments(String email, String subject, String description,
+			MultipartFile[] multipartFiles) throws IOException {
+		log.info("inside create ticket attachment");
+		// check if email already exist in db ...
+		Ticket ticket = ticketDao.getTicketByEmail(email);
+		if (ObjectUtils.isNotEmpty(ticket)) {
+			log.info("email already exist in db and freshdesk......");
+			new NotFoundException(messageTranslator.toLocale("email already exist in db and freshdesk", email));
+
+		}
+
+		TicketResponseDto createticket = ticketService.createTicketWithAttachments(email, subject, description,
+				multipartFiles);
+		Ticket ticketFromFreshDeskDto = populateTicketModelFromDto(createticket, email);
+		Ticket ticketFromDb = ticketDao.createTicket(ticketFromFreshDeskDto);
+
+		return convertToResponseDto(ticketFromDb);
+	}
+
+	public TicketResponseDto getAllTicket(String filter, Long requesterId, String email, String uniqueExternalId,
+			Long companyId, String updatedSince, String orderBy, String orderType, String include) {
+		log.info("inside get all ticket controller");
+		Map<String, String> filters = new HashMap<>();
+
+		if (filter != null)
+			filters.put("filter", filter);
+		if (requesterId != null)
+			filters.put("requester_id", requesterId.toString());
+		if (email != null)
+			filters.put("email", email);
+		if (uniqueExternalId != null)
+			filters.put("unique_external_id", uniqueExternalId);
+		if (companyId != null)
+			filters.put("company_id", companyId.toString());
+		if (updatedSince != null)
+			filters.put("updated_since", updatedSince);
+		if (orderBy != null)
+			filters.put("order_by", orderBy);
+		if (orderType != null)
+			filters.put("order_type", orderType);
+		if (include != null)
+			filters.put("include", include);
+
+		TicketResponseDto response = ticketService.getAllTickets(filters);
+
+		return response;
+	}
+
+	public TicketResponseDto getTicketById(Long id, String include) {
+		log.info("getting ticket by id from db");
+		Ticket ticketFromDb = ticketDao.getTicketById(id);
+		// getting ticket id from tick api ..
+		TicketResponseDto getTicket = ticketService.getTicketById(id, include);
+		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
+			log.info("ticket id  is null in db or freshdesk......");
+			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+
+		}
+		return getTicket;
+	}
+
+	public void deleteTicketById(Long id) {
+		log.info("getting ticket by id from db");
+		Ticket ticketFromDb = ticketDao.getTicketById(id);
+		// getting ticket id from tick api ..
+		TicketResponseDto getTicket = ticketService.getTicketById(id, null);
+		if (ObjectUtils.isEmpty(ticketFromDb) || ObjectUtils.isEmpty(getTicket)) {
+			log.info("ticket id  is null in db or freshdesk......");
+			new NotFoundException(messageTranslator.toLocale("ticket id  is null in db or freshdesk"));
+
+		}
+		ticketService.deleteTicketById(id);
+
+	}
+
 	private Ticket populateTicketModelFromDto(TicketResponseDto ticketDto, String email) {
 		Ticket ticket = new Ticket();
 		ticket.setName(ticketDto.getSubject());
@@ -81,6 +161,7 @@ public class TicketProcessor {
 		ticket.setReplyCcEmails(ticketDto.getReplyCcEmails());
 		ticket.setSpam(ticketDto.getSpam());
 		ticket.setToEmails(ticketDto.getToEmails());
+		ticket.setTicketId(ticketDto.getId());
 
 		return ticket;
 	}
@@ -100,7 +181,7 @@ public class TicketProcessor {
 		responseDto.setStatus(ticket.getStatus());
 		responseDto.setSubject(ticket.getSubject());
 		responseDto.setCompanyId(ticket.getCompanyId());
-		responseDto.setId(ticket.getId());
+		responseDto.setId(ticket.getTicketId());
 		responseDto.setType(ticket.getType());
 		responseDto.setToEmails(ticket.getToEmails());
 		responseDto.setProductId(ticket.getProductId());
